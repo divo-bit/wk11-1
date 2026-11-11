@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oakwood Town - Directions Writing App</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f0f4f8;
+            color: #2c3e50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        header p {
+            color: #7f8c8d;
+            font-size: 1rem;
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            max-width: 1100px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 1px solid #dcdde1;
+        }
+
+        @media (min-width: 850px) {
+            .main-container {
+                flex-direction: row;
+            }
+        }
+
+        /* 지도 영역 */
+        .map-section {
+            flex: 1.3;
+            background-color: #e3ece9;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-right: 1px solid #dcdde1;
+        }
+
+        .map-section img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 2px solid #b2bec3;
+        }
+
+        .map-caption {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        /* 길찾기 미션 / 쓰기 영역 */
+        .quiz-section {
+            flex: 1;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background-color: #ffffff;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #eef2f7;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: #2980b9;
+        }
+
+        .mission-card {
+            background: #f8f9fa;
+            color: #2c3e50;
+            padding: 18px;
+            border-radius: 8px;
+            border-left: 6px solid #3498db;
+            margin-bottom: 15px;
+        }
+
+        .mission-card h3 {
+            font-size: 1.1rem;
+            color: #2980b9;
+            margin-bottom: 8px;
+        }
+
+        .route-text {
+            font-size: 1.1rem;
+            line-height: 1.4;
+            margin-bottom: 12px;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+
+        /* 힌트 박스 */
+        .hint-box {
+            background: #e8f4f8;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: #2c3e50;
+            border: 1px dashed #3498db;
+            line-height: 1.4;
+        }
+
+        .hint-box strong {
+            color: #d35400;
+        }
+
+        /* 입력 폼 */
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .input-section label {
+            font-weight: bold;
+            font-size: 0.95rem;
+            color: #34495e;
+        }
+
+        textarea {
+            width: 100%;
+            height: 90px;
+            padding: 12px;
+            border-radius: 6px;
+            border: 2px solid #bdc3c7;
+            background-color: #fafafa;
+            color: #2c3e50;
+            font-size: 1rem;
+            resize: none;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: #3498db;
+            background-color: #fff;
+        }
+
+        /* 버튼 그룹 */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        button.action-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-check {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .btn-check:hover {
+            background-color: #27ae60;
+        }
+
+        .btn-next {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-next:hover {
+            background-color: #2980b9;
+        }
+
+        /* 피드백 박스 */
+        .feedback {
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-top: 10px;
+            display: none;
+            font-size: 0.95rem;
+            white-space: pre-line;
+        }
+
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🗺️ Oakwood Town - Directions Writing Challenge</h1>
+        <p>지도를 보고 길 안내 영어 문장을 완성하여 써보세요!</p>
+    </header>
+
+    <div class="main-container">
+        <!-- 마을 지도 (assets/town.png 경로 우선 적용, 감지 안될 시 town.png 로 예비 전환) -->
+        <div class="map-section">
+            <img id="town-map-img" src="./assets/town.png" onerror="handleImageError(this)" alt="Oakwood Creek Town Map">
+            <div class="map-caption">📍 Oakwood Creek Town Map</div>
+        </div>
+
+        <!-- 길찾기 미션 노트 -->
+        <div class="quiz-section">
+            <div>
+                <div class="status-bar">
+                    <span>MISSION #<span id="mission-num">1</span></span>
+                    <span>SCORE: <span id="score-count">0</span> / <span id="total-missions">0</span></span>
+                </div>
+
+                <div class="mission-card">
+                    <h3>🚩 <span id="mission-title">Loading...</span></h3>
+                    <div class="route-text" id="route-text">길찾기 문제를 불러오는 중입니다...</div>
+                    
+                    <div class="hint-box">
+                        <strong>💡 추천 표현 및 힌트:</strong><br>
+                        <span id="hint-text">힌트 내용</span>
+                    </div>
+                </div>
+
+                <div class="input-section">
+                    <label for="user-writing">✍️ 길 안내 영어 문장 쓰기:</label>
+                    <textarea id="user-writing" placeholder="여기에 영어 문장을 입력하세요... (예: Go straight and turn left. It's on your right.)"></textarea>
+                </div>
+
+                <div class="btn-group">
+                    <button class="action-btn btn-check" onclick="checkWriting()">정답 확인</button>
+                    <button class="action-btn btn-next" onclick="nextMission()">다음 미션 ▶</button>
+                </div>
+
+                <div id="feedback" class="feedback"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 이미지 로딩 오류 시 예비 경로 처리 (assets/town.png -> town.png)
+        function handleImageError(img) {
+            if (img.src.includes('assets/town.png')) {
+                img.src = './town.png'; // 루트 경로의 town.png로 재시도
+            }
+        }
+
+        // 초등학교 6학년 길찾기 단원 핵심 문제 데이터
+        const missions = [
+            {
+                title: "도서관(Library)으로 가는 길",
+                route: "Q. School(학교)에서 출발하여 Library(도서관)로 가는 길을 안내하세요.",
+                hint: "직진한 뒤 우회전/좌회전하거나, 'It is next to the school.'(학교 옆에 있어요) 형태로 적어보세요.",
+                keywords: [["go straight", "next to", "turn"]],
+                mustIncludeAny: ["library", "it"]
+            },
+            {
+                title: "우체국(Post Office) 찾는 방법",
+                route: "Q. 1st Ave를 따라 가다가 Post Office(우체국)를 찾아가는 문장을 작성하세요.",
+                hint: "'Go straight and turn right. It is next to the fire station.' 구문을 활용하세요.",
+                keywords: [["go straight", "turn", "next to", "between"]],
+                mustIncludeAny: ["post office", "it"]
+            },
+            {
+                title: "빵집(Bakery) 위치 안내",
+                route: "Q. Bus Stop(버스 정류장)에 있는 사람에게 Bakery(빵집) 위치를 설명하세요.",
+                hint: "빵집은 버스정류장 맞은편에 있습니다. 'It is across from the bus stop.' 또는 'It is next to the gas station.'",
+                keywords: [["across from", "next to", "oak st"]],
+                mustIncludeAny: ["bakery", "it"]
+            },
+            {
+                title: "병원(Hospital) 찾아가기",
+                route: "Q. Main Street에서 Hospital(병원)로 가는 길을 설명해 주세요.",
+                hint: "'Turn left on Elm Street.' 또는 'It is next to the pharmacy.'(약국 옆에 있어요) 문장을 써보세요.",
+                keywords: [["turn", "next to", "main street", "elm street"]],
+                mustIncludeAny: ["hospital", "it"]
+            },
+            {
+                title: "공원(Central Park) 위치 말하기",
+                route: "Q. Police Station(경찰서) 근처에 있는 Central Park(공원) 위치를 안내해 보세요.",
+                hint: "'Go straight on 1st Ave. It is behind the police station.' 또는 'It is near the police station.'",
+                keywords: [["behind", "near", "next to", "go straight"]],
+                mustIncludeAny: ["park", "it"]
+            }
+        ];
+
+        let currentMissionIndex = 0;
+        let scoreCount = 0;
+
+        window.onload = function() {
+            document.getElementById('total-missions').innerText = missions.length;
+            loadMission();
+        };
+
+        function loadMission() {
+            const data = missions[currentMissionIndex];
+            document.getElementById('mission-num').innerText = currentMissionIndex + 1;
+            document.getElementById('mission-title').innerText = data.title;
+            document.getElementById('route-text').innerText = data.route;
+            document.getElementById('hint-text').innerText = data.hint;
+            document.getElementById('user-writing').value = '';
+            
+            const feedbackEl = document.getElementById('feedback');
+            feedbackEl.className = 'feedback';
+            feedbackEl.style.display = 'none';
+        }
+
+        function checkWriting() {
+            const userInput = document.getElementById('user-writing').value.trim();
+            const feedbackEl = document.getElementById('feedback');
+            const data = missions[currentMissionIndex];
+
+            if (!userInput) {
+                alert("영어 문장을 작성해 주세요!");
+                return;
+            }
+
+            const lowerInput = userInput.toLowerCase();
+
+            // 1. 목적지/주어(It 또는 장소명) 체크
+            const hasSubject = data.mustIncludeAny.some(s => lowerInput.includes(s));
+            
+            // 2. 길안내 핵심 키워드 체크
+            const hasKeyword = data.keywords[0].some(kw => lowerInput.includes(kw));
+
+            if (hasSubject && hasKeyword) {
+                feedbackEl.innerText = "🎉 Excellent! 참 잘했습니다. 길 안내 문장이 완벽합니다!";
+                feedbackEl.className = "feedback correct";
+                
+                if (!missions[currentMissionIndex].isSolved) {
+                    missions[currentMissionIndex].isSolved = true;
+                    scoreCount++;
+                    document.getElementById('score-count').innerText = scoreCount;
+                }
+            } else {
+                let errorMsg = "💡 문장을 조금 더 보완해 볼까요?\n";
+                if (!hasSubject) {
+                    errorMsg += "- 찾고자 하는 장소 이름이나 'It'을 포함했는지 확인하세요.\n";
+                }
+                if (!hasKeyword) {
+                    errorMsg += "- 힌트에 제시된 길안내 표현(Go straight, turn, next to, across from 등)을 활용해 보세요.";
+                }
+                feedbackEl.innerText = errorMsg;
+                feedbackEl.className = "feedback incorrect";
+            }
+        }
+
+        function nextMission() {
+            if (currentMissionIndex < missions.length - 1) {
+                currentMissionIndex++;
+                loadMission();
+            } else {
+                alert(`모든 길찾기 미션을 완료했습니다! (최종 점수: ${scoreCount}/${missions.length})`);
+                currentMissionIndex = 0;
+                loadMission();
+            }
+        }
+    </script>
+</body>
+</html>
