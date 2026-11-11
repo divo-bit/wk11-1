@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oakwood Creek - Town Detective Writing Mission</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #1e272e;
+            color: #dcdde1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            color: #e1b12c;
+            font-size: 2rem;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        header p {
+            color: #f5f6fa;
+            font-size: 1rem;
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            max-width: 1100px;
+            width: 100%;
+            background: #2f3640;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            border: 2px solid #718093;
+        }
+
+        @media (min-width: 850px) {
+            .main-container {
+                flex-direction: row;
+            }
+        }
+
+        /* 지도 영역 */
+        .map-section {
+            flex: 1.3;
+            background-color: #111;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-right: 1px solid #718093;
+        }
+
+        .map-section img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 3px solid #e1b12c;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
+        }
+
+        .map-caption {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #44bd32;
+            font-weight: bold;
+        }
+
+        /* 탐정 노트 / 퀴즈 영역 */
+        .detective-section {
+            flex: 1;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background-color: #2f3640;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #353b48;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: #e1b12c;
+        }
+
+        .case-card {
+            background: #f5f6fa;
+            color: #2f3640;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 8px solid #e1b12c;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .case-card h3 {
+            font-size: 1.1rem;
+            color: #8c7ae6;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .clue-text {
+            font-size: 1.05rem;
+            line-height: 1.5;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .hint-toggle {
+            background: none;
+            border: none;
+            color: #00a8ff;
+            cursor: pointer;
+            font-size: 0.85rem;
+            text-decoration: underline;
+            padding: 0;
+            margin-bottom: 5px;
+        }
+
+        .hint-box {
+            display: none;
+            background: #dcdde1;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: #2f3640;
+            margin-top: 5px;
+        }
+
+        /* 입력 폼 */
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .input-section label {
+            font-weight: bold;
+            font-size: 0.95rem;
+            color: #f5f6fa;
+        }
+
+        textarea {
+            width: 100%;
+            height: 90px;
+            padding: 12px;
+            border-radius: 6px;
+            border: 2px solid #718093;
+            background-color: #353b48;
+            color: #fff;
+            font-size: 1rem;
+            resize: none;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: #e1b12c;
+        }
+
+        /* 버튼 그룹 */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        button.action-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-check {
+            background-color: #44bd32;
+            color: white;
+        }
+
+        .btn-check:hover {
+            background-color: #4cd137;
+        }
+
+        .btn-next {
+            background-color: #00a8ff;
+            color: white;
+        }
+
+        .btn-next:hover {
+            background-color: #0097e6;
+        }
+
+        /* 피드백 박스 */
+        .feedback {
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-top: 10px;
+            display: none;
+            font-size: 0.95rem;
+        }
+
+        .feedback.correct {
+            background-color: #20bf6b;
+            color: #fff;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #eb3b5a;
+            color: #fff;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🕵️‍♂️ Oakwood Town Detective</h1>
+        <p>지도를 조심스럽게 조사하고, 사건 단서에 알맞은 영어 문장을 작성하세요!</p>
+    </header>
+
+    <div class="main-container">
+        <!-- 사건 현장 지도 -->
+        <div class="map-section">
+            <img src="town.png" alt="Oakwood Creek Town Map">
+            <div class="map-caption">🔍 MAP: Oakwood Creek Town</div>
+        </div>
+
+        <!-- 탐정 미션 노트 -->
+        <div class="detective-section">
+            <div>
+                <div class="status-bar">
+                    <span>CASE #<span id="case-num">1</span></span>
+                    <span>SOLVED: <span id="solved-count">0</span> / <span id="total-cases">0</span></span>
+                </div>
+
+                <div class="case-card">
+                    <h3>🔎 Case File: <span id="case-title">Loading...</span></h3>
+                    <div class="clue-text" id="clue-text">단서를 불러오는 중입니다...</div>
+                    <button class="hint-toggle" onclick="toggleHint()">💡 단서 힌트 보기/숨기기</button>
+                    <div class="hint-box" id="hint-box"></div>
+                </div>
+
+                <div class="input-section">
+                    <label for="user-writing">✍️ 탐정 보고서 작성 (영어 문장 쓰기):</label>
+                    <textarea id="user-writing" placeholder="여기에 영어 문장 전체를 입력하세요..."></textarea>
+                </div>
+
+                <div class="btn-group">
+                    <button class="action-btn btn-check" onclick="checkWriting()">사건 분석 제출</button>
+                    <button class="action-btn btn-next" onclick="nextCase()">다음 사건 ▶</button>
+                </div>
+
+                <div id="feedback" class="feedback"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 초등 6학년 맞춤형 사건 퀴즈 데이터
+        const cases = [
+            {
+                title: "도서관의 위치를 찾아라!",
+                clue: "용의자가 School 근처에 숨었습니다. 지도를 보고 Library가 School 옆에 있음을 설명하는 문장을 쓰세요.",
+                hint: "'It is next to the school.' 또는 'The library is next to the school.' 형태로 작성해 보세요.",
+                keywords: ["next to", "school"],
+                mustIncludeAny: ["library", "it"]
+            },
+            {
+                title: "소방서의 위치 정보",
+                clue: "Fire Station의 정확한 위치 단서가 필요합니다. Fire Station이 Police Station과 Post Office 사이에 있다는 문장을 쓰세요.",
+                hint: "'between ~ and ~' 구문을 사용하세요. (예: It is between the police station and the post office.)",
+                keywords: ["between", "police station", "post office"],
+                mustIncludeAny: ["fire station", "it"]
+            },
+            {
+                title: "빵집과 버스정류장",
+                clue: "Bakery는 Bus Stop 맞은편(Oak Street 건너편)에 있습니다. 이를 설명하는 영어 문장을 작성하세요.",
+                hint: "'across from' 구문을 사용하세요. (예: The bakery is across from the bus stop.)",
+                keywords: ["across from", "bus stop"],
+                mustIncludeAny: ["bakery", "it"]
+            },
+            {
+                title: "병원 찾기 미션",
+                clue: "Hospital은 Pharmacy 옆에 있습니다. 병원의 위치를 알리는 완전한 문장을 쓰세요.",
+                hint: "'The hospital is next to the pharmacy.' 구문을 참고하세요.",
+                keywords: ["next to", "pharmacy"],
+                mustIncludeAny: ["hospital", "it"]
+            },
+            {
+                title: "공원의 위치 추적",
+                clue: "Central Park는 Police Station 뒤쪽(1st Ave 북쪽)에 위치해 있습니다. Park가 어디 근처에 있는지 자유롭게 위치를 설명해 보세요.",
+                hint: "'The park is near the police station.' 또는 'It is behind the police station.'처럼 써보세요.",
+                keywords: ["police station"],
+                mustIncludeAny: ["park", "it"]
+            }
+        ];
+
+        let currentCaseIndex = 0;
+        let solvedCount = 0;
+
+        window.onload = function() {
+            document.getElementById('total-cases').innerText = cases.length;
+            loadCase();
+        };
+
+        function loadCase() {
+            const caseData = cases[currentCaseIndex];
+            document.getElementById('case-num').innerText = currentCaseIndex + 1;
+            document.getElementById('case-title').innerText = caseData.title;
+            document.getElementById('clue-text').innerText = caseData.clue;
+            document.getElementById('hint-box').innerText = caseData.hint;
+            document.getElementById('hint-box').style.display = 'none';
+            document.getElementById('user-writing').value = '';
+            
+            const feedbackEl = document.getElementById('feedback');
+            feedbackEl.className = 'feedback';
+            feedbackEl.style.display = 'none';
+        }
+
+        function toggleHint() {
+            const hintBox = document.getElementById('hint-box');
+            if (hintBox.style.display === 'none' || hintBox.style.display === '') {
+                hintBox.style.display = 'block';
+            } else {
+                hintBox.style.display = 'none';
+            }
+        }
+
+        function checkWriting() {
+            const userInput = document.getElementById('user-writing').value.trim();
+            const feedbackEl = document.getElementById('feedback');
+            const caseData = cases[currentCaseIndex];
+
+            if (!userInput) {
+                alert("보고서 내용을 영어 문장으로 입력하세요!");
+                return;
+            }
+
+            const lowerInput = userInput.toLowerCase();
+
+            // 1. 필수 주어/대명사 체크
+            const hasSubject = caseData.mustIncludeAny.some(s => lowerInput.includes(s));
+            // 2. 키워드 검사 (전치사 및 주요 장소명 포함 여부)
+            const hasAllKeywords = caseData.keywords.every(kw => lowerInput.includes(kw));
+
+            if (hasSubject && hasAllKeywords) {
+                feedbackEl.innerText = "🎉 사건 해결 성공! 완벽한 보고서입니다. (Case Solved!)";
+                feedbackEl.className = "feedback correct";
+                
+                // 점수 중복 증가 방지
+                if (!cases[currentCaseIndex].isSolved) {
+                    cases[currentCaseIndex].isSolved = true;
+                    solvedCount++;
+                    document.getElementById('solved-count').innerText = solvedCount;
+                }
+            } else {
+                let errorMsg = "💡 보고서 보완 필요: ";
+                if (!hasSubject) {
+                    errorMsg += "주어(예: It 또는 장소 이름)를 포함했는지 확인하세요. ";
+                }
+                if (!hasAllKeywords) {
+                    errorMsg += "위치 표현(예: " + caseData.keywords.join(", ") + ")이 올바르게 들어가 있는지 확인하세요.";
+                }
+                feedbackEl.innerText = errorMsg;
+                feedbackEl.className = "feedback incorrect";
+            }
+        }
+
+        function nextCase() {
+            if (currentCaseIndex < cases.length - 1) {
+                currentCaseIndex++;
+                loadCase();
+            } else {
+                alert(`축하합니다! 모든 사건을 해결했습니다. (해결한 사건: ${solvedCount}/${cases.length})`);
+                currentCaseIndex = 0;
+                loadCase();
+            }
+        }
+    </script>
+</body>
+</html>
